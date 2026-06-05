@@ -84,7 +84,7 @@
                 </div>
 
                 <!-- Language Toggle -->
-                <div class="bg-slate-100 dark:bg-slate-900 p-1 rounded-xl flex items-center border border-slate-200/40 dark:border-slate-800/40 hidden xs:flex">
+                <div class="bg-slate-100 dark:bg-slate-900 p-1 rounded-xl flex items-center border border-slate-200/40 dark:border-slate-800/40 xs:flex">
                     <button id="lang-btn-en" onclick="toggleLanguage('en')" class="px-2.5 py-1 text-xs font-bold rounded-lg transition-all duration-200">EN</button>
                     <button id="lang-btn-hi" onclick="toggleLanguage('hi')" class="px-2.5 py-1 text-xs font-bold rounded-lg transition-all duration-200">HI</button>
                 </div>
@@ -154,6 +154,10 @@
                             </span>
                             <span class="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 bg-rose-100/50 dark:bg-rose-950/40 px-2 py-1 rounded-lg">
                                 <i class="fa-solid fa-xmark text-[10px]"></i> <span id="score-live-wrong">0</span>
+                            </span>
+                            <!-- New Skip Counter -->
+                            <span class="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-700/40 px-2 py-1 rounded-lg">
+                                <i class="fa-solid fa-forward-step text-[10px]"></i> <span id="score-live-skipped">0</span>
                             </span>
                         </div>
                         <div class="flex items-center gap-1.5 text-brand-600 dark:text-brand-400 font-extrabold text-xs bg-brand-50 dark:bg-brand-950/30 px-2.5 py-1 rounded-lg">
@@ -583,26 +587,40 @@
         function updateLiveScoreboard() {
             let correct = 0;
             let wrong = 0;
-            const answeredCount = Object.keys(state.userAnswers).length;
-
-            for (const [index, userChar] of Object.entries(state.userAnswers)) {
-                const q = state.allQuestions[index];
-                if (q) {
-                    const correctChar = (q.Answer || q.answer || "").trim().toUpperCase();
-                    if (userChar === correctChar) {
-                        correct++;
-                    } else {
-                        wrong++;
-                    }
+    
+            // Calculate answered vs skipped
+            const answeredIndices = Object.keys(state.userAnswers).map(Number);
+            const totalAttempted = answeredIndices.length;
+            const currentViewedIndex = state.currentQuestionIndex;
+    
+            // A question is skipped if the user moved past it without answering
+            // We count all indices less than the current index that aren't in userAnswers
+            let skipped = 0;
+            for(let i = 0; i <= currentViewedIndex; i++) {
+               if (state.userAnswers[i] === undefined) {
+                 skipped++;
                 }
-            }
+             }
 
-            const percent = answeredCount === 0 ? 0 : Math.round((correct / answeredCount) * 100);
+            // Tally correct/wrong
+            for (const [index, userChar] of Object.entries(state.userAnswers)) {
+            const q = state.allQuestions[index];
+            if (q) {
+            const correctChar = (q.Answer || q.answer || "").trim().toUpperCase();
+            if (userChar === correctChar) correct++;
+              else wrong++;
+              }
+             }
+
+            const percent = totalAttempted === 0 ? 0 : Math.round((correct / totalAttempted) * 100);
 
             document.getElementById('score-live-correct').innerText = correct;
             document.getElementById('score-live-wrong').innerText = wrong;
+            document.getElementById('score-live-skipped').innerText = skipped;
             document.getElementById('score-live-percent').innerText = percent;
         }
+
+
 
         function renderActiveQuestionCard() {
             const qData = state.allQuestions[state.currentQuestionIndex];
