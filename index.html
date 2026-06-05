@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced MCQ Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 24px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-slide-in { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { brand: { 50: '#f5f3ff', 100: '#ede9fe', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' } } } }
+        }
+    </script>
+</head>
+<body class="bg-[#f8fafc] text-slate-900 dark:bg-[#0b0f19] dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300 overflow-x-hidden">
+
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300"></div>
+    <div id="sidebar-menu" class="fixed top-0 left-0 bottom-0 w-72 bg-white dark:bg-[#111827] z-50 shadow-2xl transform -translate-x-full transition-transform duration-300 flex flex-col border-r border-slate-200/80 dark:border-slate-800/80">
+        <div class="p-4 border-b border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-book-open text-brand-600 dark:text-brand-400 text-sm"></i>
+                <span class="font-bold text-xs uppercase tracking-wider text-slate-400">Select Subject Chapters</span>
+            </div>
+            <button onclick="toggleSidebar()" class="w-7 h-7 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xs"></i></button>
+        </div>
+        <div id="sidebar-subjects-container" class="flex-1 overflow-y-auto p-3 space-y-1 custom-scrollbar">
+            <p class="text-[11px] text-slate-400 text-center py-4">Loading subject tracks...</p>
+        </div>
+    </div>
+
+    <nav class="sticky top-0 z-40 bg-white/80 dark:bg-[#111827]/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 transition-colors">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
+            
+            <div class="flex items-center gap-2.5">
+                <button onclick="toggleSidebar()" class="w-9 h-9 rounded-xl border border-slate-200/60 dark:border-slate-800/60 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors" title="Open Subject Drawer">
+                    <i class="fa-solid fa-bars text-sm"></i>
+                </button>
+                <div class="flex items-center gap-3 cursor-pointer" onclick="triggerHapticFeedback(15); navigateTo('subjects')">
+                    <div class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                        <i class="fa-solid fa-graduation-cap text-lg"></i>
+                    </div>
+                    <div class="hidden sm:block">
+                        <span class="font-bold text-lg tracking-tight bg-gradient-to-r from-brand-600 to-indigo-500 bg-clip-text text-transparent dark:from-brand-400 dark:to-indigo-400">ExamPrep</span>
+                        <span class="text-[10px] font-bold block text-slate-400 dark:text-slate-500 tracking-wider uppercase -mt-1">AI Matrix Engine</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button id="silent-btn" onclick="toggleHaptics()" class="px-2.5 py-1.5 rounded-xl text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-400 text-xs font-bold flex items-center gap-1.5 border border-emerald-200/40" title="Toggle Touch Vibration">
+                    <i class="fa-solid fa-volume-high text-xs"></i> <span class="text-[10px] uppercase font-bold hidden xs:block">Vibe On</span>
+                </button>
+
+                <div class="bg-slate-100 dark:bg-slate-900 p-1 rounded-xl flex items-center border border-slate-200/40 dark:border-slate-800/40">
+                    <button id="lang-btn-en" onclick="toggleLanguage('en')" class="px-2.5 py-1 text-xs font-bold rounded-lg transition-all duration-200">EN</button>
+                    <button id="lang-btn-hi" onclick="toggleLanguage('hi')" class="px-2.5 py-1 text-xs font-bold rounded-lg transition-all duration-200">HI</button>
+                </div>
+
+                <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200/40 dark:border-slate-800/40">
+                    <button onclick="triggerHapticFeedback(10); toggleDarkMode()" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 transition-colors" title="Toggle Day/Night Mode">
+                        <i id="theme-icon" class="fa-solid fa-moon text-xs"></i>
+                    </button>
+
+                    <button onclick="triggerHapticFeedback(15); navigateTo('subjects')" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 transition-colors" title="Go to Dashboard Home">
+                        <i class="fa-solid fa-house text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex-1 max-w-5xl w-full mx-auto px-4 py-8 relative">
+        
+        <div id="global-loader" class="hidden absolute inset-0 bg-[#f8fafc]/60 dark:bg-[#0b0f19]/60 backdrop-blur-sm z-50 flex items-center justify-center">
+            <div class="flex flex-col items-center gap-3 bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800">
+                <div class="w-9 h-9 border-4 border-brand-500/20 border-t-brand-600 rounded-full animate-spin"></div>
+                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Syncing database node...</span>
+            </div>
+        </div>
+
+        <section id="view-subjects" class="space-y-6 hidden animate-slide-in">
+            <div class="border-b border-slate-200/60 dark:border-slate-800/60 pb-4">
+                <h2 class="text-xl font-extrabold text-slate-950 dark:text-white">Knowledge Repositories</h2>
+                <p class="text-xs font-medium text-slate-400 dark:text-slate-500 mt-1">Select a core matrix track below to review operational chapters</p>
+            </div>
+            <div id="subjects-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </section>
+
+        <section id="view-chapters" class="space-y-6 hidden animate-slide-in">
+            <div class="flex items-center gap-3">
+                <button onclick="triggerHapticFeedback(15); navigateTo('subjects')" class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-500"><i class="fa-solid fa-arrow-left text-xs"></i></button>
+                <div>
+                    <h2 id="current-subject-title" class="text-xl font-extrabold text-slate-950 dark:text-white">Chapters</h2>
+                    <p class="text-xs font-medium text-slate-400 mt-0.5">Select a sub-specialization division to pull questions</p>
+                </div>
+            </div>
+            <div id="chapters-container" class="grid grid-cols-1 gap-3"></div>
+        </section>
+
+        <section id="view-quiz" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8 animate-slide-in">
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 p-6 rounded-3xl shadow-sm space-y-6">
+                    <div class="flex items-center justify-between text-xs font-bold text-slate-400 dark:text-slate-500">
+                        <span id="quiz-chapter-indicator">CHAPTER LOAD TRACK</span>
+                        <span id="quiz-question-counter" class="bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md text-brand-600 dark:text-brand-400">Q 0/0</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 id="question-text" class="text-base font-bold leading-relaxed text-slate-900 dark:text-slate-100">Loading evaluation criteria...</h3>
+                        <div id="options-container" class="space-y-3 pt-2"></div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/60 gap-2 flex-wrap">
+                        <button onclick="changeQuestion(-1)" id="btn-prev" class="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-all flex items-center gap-2"><i class="fa-solid fa-chevron-left text-[10px]"></i> Previous</button>
+                        <div class="flex items-center gap-2">
+                            <button onclick="triggerHapticFeedback(10); toggleExplanation()" id="btn-explain" class="px-4 py-2 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200/60 hover:bg-amber-100 rounded-xl dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/40 transition-all flex items-center gap-2"><i class="fa-solid fa-lightbulb"></i> Analysis</button>
+                            <button onclick="changeQuestion(1)" id="btn-next" class="px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 shadow-sm shadow-brand-500/10 rounded-xl transition-all flex items-center gap-2">Next <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="explanation-panel" class="hidden bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 p-6 rounded-3xl animate-slide-in">
+                    <h4 class="text-xs font-extrabold text-emerald-800 dark:text-emerald-400 flex items-center gap-2 uppercase tracking-wider mb-2"><i class="fa-solid fa-circle-info"></i> Detailed Solution Matrix</h4>
+                    <p id="explanation-text" class="text-xs leading-relaxed font-medium text-slate-600 dark:text-slate-300"></p>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 p-5 rounded-3xl shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/60 pb-3">
+                        <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Evaluation Index</h4>
+                        <button onclick="triggerHapticFeedback(25); submitQuizEvaluationReport()" class="px-3 py-1.5 bg-rose-50 border border-rose-100 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/30 dark:border-rose-900/40 dark:text-rose-400 text-[11px] font-bold rounded-lg transition-all">End Review</button>
+                    </div>
+                    <div id="question-matrix-grid" class="grid grid-cols-5 gap-2 max-h-[260px] overflow-y-auto custom-scrollbar pr-1"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-results" class="max-w-md mx-auto bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl shadow-xl p-8 hidden text-center animate-slide-in">
+            <div class="w-16 h-16 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto text-2xl shadow-inner mb-4"><i class="fa-solid fa-chart-line"></i></div>
+            <h2 class="text-xl font-black text-slate-950 dark:text-white">Performance Metrics Analysis</h2>
+            <p class="text-xs font-semibold text-slate-400 mt-1">Operational criteria scoring compilation complete</p>
+            
+            <div class="grid grid-cols-2 gap-4 my-6">
+                <div class="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/60"><span id="score-correct" class="block text-xl font-extrabold text-emerald-600 dark:text-emerald-400">0</span><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Correct Matrix</span></div>
+                <div class="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/60"><span id="score-total" class="block text-xl font-extrabold text-brand-600 dark:text-brand-400">0</span><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Total Analyzed</span></div>
+            </div>
+
+            <button onclick="triggerHapticFeedback(15); navigateTo('subjects')" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md shadow-brand-500/10 active:scale-[0.99] transition-all">Return to Repository Matrix</button>
+        </section>
+
+    </div>
+
+    <script>
+        // ⚠️ DEFINE YOUR DEPLOYMENT API GATEWAY LINK HERE:
+        const API_URL = "https://script.google.com/macros/s/AKfycbzX9MOoGFsOJTe6URTn4t3xW44Q3XuDJfjpdKfs-7fTC4FtyfeC7n7gYhMr_HXTgael/exec"; 
+
+        // Core App Memory Mapping States
+        let selectedLanguage = "en";
+        let hapticsEnabled = true; 
+        let activeSubject = "";
+        let activeChapter = "";
+        
+        let allQuestions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = {}; 
+
+        // Initial setup routines
+        document.addEventListener("DOMContentLoaded", () => {
+            initSystemTheme();
+            toggleLanguage('en'); 
+        });
+
+        /**
+         * Global Touch Haptic System Engine (With Silent Toggle Integration Control Switch)
+         */
+        function triggerHapticFeedback(ms) {
+            if (hapticsEnabled && navigator.vibrate) {
+                navigator.vibrate(ms);
+            }
+        }
+
+        /**
+         * Silent / Vibration Toggle Handler Matrix Hook Post
+         */
+        function toggleHaptics() {
+            hapticsEnabled = !hapticsEnabled;
+            const btn = document.getElementById('silent-btn');
+            
+            if (hapticsEnabled) {
+                btn.innerHTML = `<i class="fa-solid fa-volume-high text-xs"></i> <span class="text-[10px] uppercase font-bold hidden xs:block">Vibe On</span>`;
+                btn.className = "px-2.5 py-1.5 rounded-xl text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-400 text-xs font-bold flex items-center gap-1.5 border border-emerald-200/40";
+                triggerHapticFeedback(20);
+            } else {
+                btn.innerHTML = `<i class="fa-solid fa-volume-xmark text-xs"></i> <span class="text-[10px] uppercase font-bold hidden xs:block">Silent</span>`;
+                btn.className = "px-2.5 py-1.5 rounded-xl text-rose-600 bg-rose-50 dark:bg-rose-950/30 dark:text-rose-400 text-xs font-bold flex items-center gap-1.5 border border-rose-200/40";
+            }
+        }
+
+        /**
+         * Sidebar Open / Close Transition Controller Post Engine Interceptor
+         */
+        function toggleSidebar() {
+            const overlay = document.getElementById('sidebar-overlay');
+            const menu = document.getElementById('sidebar-menu');
+            const isHidden = menu.classList.contains('-translate-x-full');
+            
+            if (isHidden) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    menu.classList.remove('-translate-x-full');
+                }, 20);
+            } else {
+                overlay.classList.add('opacity-0');
+                menu.classList.add('-translate-x-full');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 300);
+            }
+            triggerHapticFeedback(10);
+        }
+
+        /**
+         * Core Language Setting Inversion Matrix Switch Post
+         */
+        function toggleLanguage(lang) {
+            if (lang !== 'en' && lang !== 'hi') return;
+            selectedLanguage = lang;
+            triggerHapticFeedback(20);
+            
+            const btnEn = document.getElementById('lang-btn-en');
+            const btnHi = document.getElementById('lang-btn-hi');
+            
+            if (selectedLanguage === 'hi') {
+                if(btnHi) btnHi.className = "px-2.5 py-1 text-xs font-bold rounded-lg bg-brand-600 text-white shadow-sm";
+                if(btnEn) btnEn.className = "px-2.5 py-1 text-xs font-semibold rounded-lg text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800";
+            } else {
+                if(btnEn) btnEn.className = "px-2.5 py-1 text-xs font-bold rounded-lg bg-brand-600 text-white shadow-sm";
+                if(btnHi) btnHi.className = "px-2.5 py-1 text-xs font-semibold rounded-lg text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800";
+            }
+
+            navigateTo('subjects');
+            loadSubjects();
+        }
+
+        /**
+         * Component View State Matrix Router Engine
+         */
+        function navigateTo(viewId) {
+            ['view-subjects', 'view-chapters', 'view-quiz', 'view-results'].forEach(v => {
+                document.getElementById(v).classList.add('hidden');
+            });
+            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /**
+         * Action Pipeline 1: Stream All Available Subjects Dynamics
+         */
+        function loadSubjects() {
+            showLoader();
+            
+            const subjectTranslations = {
+                "History": "इतिहास", "Polity": "राजव्यवस्था", "Computer": "कंप्यूटर",
+                "UP GK": "उत्तर प्रदेश सामान्य ज्ञान", "Economic & Social Development": "आर्थिक और सामाजिक विकास",
+                "Geography ": "भूगोल", "Geography": "भूगोल", "Environment & Ecology": "पर्यावरण और पारिस्थितिकी"
+            };
+
+            fetch(`${API_URL}?action=getSubjects&lang=${selectedLanguage}`)
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('subjects-container');
+                    const sidebarContainer = document.getElementById('sidebar-subjects-container');
+                    
+                    container.innerHTML = "";
+                    sidebarContainer.innerHTML = "";
+                    
+                    if (data.error || !Array.isArray(data) || data.length === 0) {
+                        const fallbackMsg = `<p class="text-xs font-semibold text-center text-rose-500 py-8 col-span-full">⚠️ No matching structural database logs found.</p>`;
+                        container.innerHTML = fallbackMsg;
+                        sidebarContainer.innerHTML = fallbackMsg;
+                        return;
+                    }
+
+                    data.forEach(sub => {
+                        const cleanKey = sub.trim();
+                        let displayName = sub;
+                        if (selectedLanguage === 'hi') {
+                            displayName = subjectTranslations[sub] || subjectTranslations[cleanKey] || sub;
+                        }
+
+                        // Main Content Area Card Selection Grid Hook Up
+                        const el = document.createElement('div');
+                        el.className = "p-5 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl shadow-sm flex items-center justify-between cursor-pointer hover:border-brand-500/40 group transition-all duration-200 active:scale-[0.99]";
+                        el.onclick = () => { triggerHapticFeedback(15); selectSubjectTrack(sub); };
+                        el.innerHTML = `
+                            <div class="flex items-center gap-4">
+                                <div class="w-11 h-11 rounded-xl bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold text-base shadow-sm group-hover:bg-brand-600 group-hover:text-white transition-colors">
+                                    ${displayName.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">${displayName}</h4>
+                                    <p class="text-[11px] font-semibold text-slate-400 mt-0.5">Explore Specializations Matrix</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-xs text-slate-300 dark:text-slate-700 group-hover:translate-x-0.5 transition-transform"></i>
+                        `;
+                        container.appendChild(el);
+
+                        // FIXED DRAW LOGIC: Calls loadChapters directly using the sub parameter context
+                        const sideEl = document.createElement('button');
+                        sideEl.className = "w-full text-left p-3 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between group transition-all";
+                        sideEl.onclick = () => { 
+                            toggleSidebar(); 
+                            activeSubject = sub;
+                            document.getElementById('current-subject-title').innerText = sub.replace(/\.json$/i, '');
+                            loadChapters(); 
+                        };
+                        sideEl.innerHTML = `
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-2 h-2 rounded-full bg-brand-500 group-hover:scale-125 transition-transform"></span>
+                                <span class="truncate max-w-[180px]">${displayName}</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-[9px] text-slate-300 group-hover:text-brand-500 group-hover:translate-x-0.5 transition-all"></i>
+                        `;
+                        sidebarContainer.appendChild(sideEl);
+                    });
+                    navigateTo('subjects');
+                })
+                .catch(err => showNetworkError(err))
+                .finally(() => hideLoader());
+        }
+
+        function selectSubjectTrack(subjectName) {
+            activeSubject = subjectName;
+            document.getElementById('current-subject-title').innerText = subjectName.replace(/\.json$/i, '');
+            loadChapters();
+        }
+
+        /**
+         * Action Pipeline 2: Pull Chapter Keys dynamically based on active subject mapping file
+         */
+        function loadChapters() {
+            showLoader();
+            fetch(`${API_URL}?action=getChapters&sheetName=${encodeURIComponent(activeSubject)}&lang=${selectedLanguage}`)
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('chapters-container');
+                    container.innerHTML = "";
+
+                    if (data.error || !Array.isArray(data) || data.length === 0) {
+                        container.innerHTML = `<p class="text-xs font-semibold text-center text-slate-500 py-6">No available operational chapters discovered for this target block.</p>`;
+                        return;
+                    }
+
+                    data.forEach((chap, idx) => {
+                        const el = document.createElement('div');
+                        el.className = "p-4 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-xl flex items-center justify-between cursor-pointer hover:border-brand-500/30 transition-all active:scale-[0.995]";
+                        el.onclick = () => { triggerHapticFeedback(20); launchQuizEvaluationEngine(chap); };
+                        el.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-bold text-slate-400 w-5">${idx + 1}.</span>
+                                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${chap}</span>
+                            </div>
+                            <i class="fa-solid fa-play text-[10px] text-brand-500 bg-brand-50 dark:bg-brand-950/40 p-2 rounded-lg"></i>
+                        `;
+                        container.appendChild(el);
+                    });
+                    navigateTo('chapters');
+                })
+                .catch(err => showNetworkError(err))
+                .finally(() => hideLoader());
+        }
+
+        /**
+         * Action Pipeline 3: Initialize quiz structure array indexes
+         */
+        function launchQuizEvaluationEngine(chapterName) {
+            activeChapter = chapterName;
+            showLoader();
+            
+            allQuestions = [];
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            document.getElementById('explanation-panel').classList.add('hidden');
+
+            fetch(`${API_URL}?action=getFullChapterData&sheetName=${encodeURIComponent(activeSubject)}&chapterName=${encodeURIComponent(activeChapter)}&lang=${selectedLanguage}&currentIndex=0`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error || !Array.isArray(data) || data.length === 0) {
+                        alert("Structural Failure: Unable to build parsing indexes for the target configuration matrix.");
+                        return;
+                    }
+                    
+                    allQuestions = data;
+                    document.getElementById('quiz-chapter-indicator').innerText = activeChapter.toUpperCase();
+                    buildQuestionMatrixSelectionGrid();
+                    renderActiveQuestionCard();
+                    navigateTo('quiz');
+                })
+                .catch(err => showNetworkError(err))
+                .finally(() => hideLoader());
+        }
+
+        /**
+         * Question Core UI Presentation Card Layer (Instant Correct/Incorrect Rendering Feedback Loop)
+         */
+        function renderActiveQuestionCard() {
+            const qData = allQuestions[currentQuestionIndex];
+            
+            if (!qData) {
+                synchronizeSlidingWindowChunkStream();
+                return;
+            }
+
+            const rawQuestion = qData.Question || qData.question || "Empty prompt metadata specification string.";
+            const rawCorrectAnswer = (qData.Answer || qData.answer || "").trim().toUpperCase();
+            const userSelection = userAnswers[currentQuestionIndex];
+            const hasAnswered = userSelection !== undefined;
+
+            document.getElementById('quiz-question-counter').innerText = `Q ${currentQuestionIndex + 1}/${allQuestions.length}`;
+            document.getElementById('question-text').innerText = rawQuestion;
+            document.getElementById('explanation-panel').classList.add('hidden');
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = "";
+
+            const optionsSchema = [
+                { char: 'A', keys: ['OptionA', 'option_a'] },
+                { char: 'B', keys: ['OptionB', 'option_b'] },
+                { char: 'C', keys: ['OptionC', 'option_c'] },
+                { char: 'D', keys: ['OptionD', 'option_d'] },
+                { char: 'E', keys: ['OptionE', 'option_e'] }
+            ];
+            
+            optionsSchema.forEach(opt => {
+                const targetKey = opt.keys.find(k => qData[k] !== undefined && qData[k] !== null && qData[k] !== "");
+                if (!targetKey) return; 
+
+                const optionText = qData[targetKey];
+                const optionChar = opt.char;
+                
+                const isSelected = userSelection === optionChar;
+                const isThisCorrectAnswer = optionChar === rawCorrectAnswer;
+
+                let buttonStyles = "bg-white border-slate-200 text-slate-700 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700";
+                let badgeStyles = "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400";
+                let statusIconHtml = `<div class="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-700 flex items-center justify-center"></div>`;
+
+                if (hasAnswered) {
+                    if (isThisCorrectAnswer) {
+                        buttonStyles = "bg-emerald-50 border-emerald-500 text-emerald-900 dark:bg-emerald-950/40 dark:border-emerald-500 dark:text-emerald-300";
+                        badgeStyles = "bg-emerald-600 text-white";
+                        statusIconHtml = `<div class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[8px]"><i class="fa-solid fa-check"></i></div>`;
+                    } else if (isSelected) {
+                        buttonStyles = "bg-rose-50 border-rose-500 text-rose-900 dark:bg-rose-950/40 dark:border-rose-500 dark:text-rose-300";
+                        badgeStyles = "bg-rose-600 text-white";
+                        statusIconHtml = `<div class="w-4 h-4 rounded-full bg-rose-600 text-white flex items-center justify-center text-[8px]"><i class="fa-solid fa-xmark"></i></div>`;
+                    } else {
+                        buttonStyles = "bg-white border-slate-100 text-slate-400 dark:bg-slate-900 dark:border-slate-800/40 dark:text-slate-600 opacity-60 pointer-events-none";
+                    }
+                }
+
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-4 text-xs font-semibold rounded-xl border transition-all duration-200 flex items-center justify-between group active:scale-[0.99] ${buttonStyles}`;
+                if (hasAnswered) btn.disabled = true;
+                
+                btn.onclick = () => registerUserSelectionInput(optionChar, rawCorrectAnswer);
+                btn.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 h-6 rounded-lg text-[11px] font-extrabold flex items-center justify-center transition-colors ${badgeStyles}">${optionChar}</span>
+                        <span>${optionText}</span>
+                    </div>
+                    ${statusIconHtml}
+                `;
+                container.appendChild(btn);
+            });
+
+            updateInteractionControlsState();
+            synchronizeActiveMatrixBlockStateHighlighting();
+        }
+
+        function registerUserSelectionInput(optionChar, correctChar) {
+            if (optionChar === correctChar) {
+                triggerHapticFeedback([12, 45, 12]); 
+            } else {
+                triggerHapticFeedback(70); 
+            }
+            
+            userAnswers[currentQuestionIndex] = optionChar;
+            renderActiveQuestionCard();
+            
+            if (optionChar !== correctChar) {
+                setTimeout(() => { toggleExplanation(true); }, 250);
+            }
+        }
+
+        function changeQuestion(direction) {
+            const targetedIndex = currentQuestionIndex + direction;
+            if (targetedIndex >= 0 && targetedIndex < allQuestions.length) {
+                triggerHapticFeedback(12);
+                currentQuestionIndex = targetedIndex;
+                renderActiveQuestionCard();
+            }
+        }
+
+        function updateInteractionControlsState() {
+            document.getElementById('btn-prev').disabled = (currentQuestionIndex === 0);
+            document.getElementById('btn-next').disabled = (currentQuestionIndex === allQuestions.length - 1);
+            document.getElementById('btn-prev').style.opacity = (currentQuestionIndex === 0) ? "0.4" : "1";
+            document.getElementById('btn-next').style.opacity = (currentQuestionIndex === allQuestions.length - 1) ? "0.4" : "1";
+        }
+
+        function toggleExplanation(forceShow = false) {
+            const panel = document.getElementById('explanation-panel');
+            if (!panel) return;
+            
+            if (!forceShow && !panel.classList.contains('hidden')) {
+                panel.classList.add('hidden');
+                return;
+            }
+
+            const qData = allQuestions[currentQuestionIndex];
+            if (!qData) return;
+
+            const rawExplanation = qData.Explanation || qData.explanation || "No descriptive explanation added to this entry node record module context loops.";
+            document.getElementById('explanation-text').innerText = rawExplanation;
+            panel.classList.remove('hidden');
+        }
+
+        /**
+         * Sliding Window Dynamic Synchronization Buffer Block
+         */
+        function synchronizeSlidingWindowChunkStream() {
+            showLoader();
+            fetch(`${API_URL}?action=getFullChapterData&sheetName=${encodeURIComponent(activeSubject)}&chapterName=${encodeURIComponent(activeChapter)}&lang=${selectedLanguage}&currentIndex=${currentQuestionIndex}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        data.forEach((q, idx) => {
+                            if (q !== null) allQuestions[idx] = q;
+                        });
+                        renderActiveQuestionCard();
+                    }
+                })
+                .catch(err => console.error("Sliding window chunk synchronization interrupt crash trace: ", err))
+                .finally(() => hideLoader());
+        }
+
+        /**
+         * Right Sidebar Progress Evaluation Navigation Tracker Matrix Grid
+         */
+        function buildQuestionMatrixSelectionGrid() {
+            const matrix = document.getElementById('question-matrix-grid');
+            matrix.innerHTML = "";
+
+            allQuestions.forEach((_, idx) => {
+                const node = document.createElement('button');
+                node.id = `matrix-node-${idx}`;
+                node.className = "h-9 text-xs font-bold rounded-xl border border-slate-200 text-slate-500 bg-slate-50 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400 dark:hover:bg-slate-900 transition-all";
+                node.innerText = idx + 1;
+                node.onclick = () => {
+                    triggerHapticFeedback(10);
+                    currentQuestionIndex = idx;
+                    renderActiveQuestionCard();
+                };
+                matrix.appendChild(node);
+            });
+        }
+
+        function synchronizeActiveMatrixBlockStateHighlighting() {
+            allQuestions.forEach((_, idx) => {
+                const node = document.getElementById(`matrix-node-${idx}`);
+                if (!node) return;
+
+                const userSelection = userAnswers[idx];
+                const isAnswered = userSelection !== undefined;
+                const isCurrent = currentQuestionIndex === idx;
+
+                if (isCurrent) {
+                    node.className = "h-9 text-xs font-extrabold rounded-xl bg-brand-600 text-white border-brand-600 shadow-sm shadow-brand-500/20";
+                } else if (isAnswered) {
+                    const qData = allQuestions[idx];
+                    const correctKey = qData ? (qData.Answer || qData.answer || "").trim().toUpperCase() : "";
+                    
+                    if (userSelection === correctKey) {
+                        node.className = "h-9 text-xs font-bold rounded-xl bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30";
+                    } else {
+                        node.className = "h-9 text-xs font-bold rounded-xl bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30";
+                    }
+                } else {
+                    node.className = "h-9 text-xs font-bold rounded-xl border border-slate-200 text-slate-500 bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400";
+                }
+            });
+        }
+
+        /**
+         * Quiz Completion & Analytics Scoring Compilation Output Engine
+         */
+        function submitQuizEvaluationReport() {
+            if (!confirm("Are you sure you want to finalize this analysis review pass profile session?")) return;
+
+            let correctCount = 0;
+            allQuestions.forEach((q, idx) => {
+                if (q) {
+                    const rawAnswerKey = (q.Answer || q.answer || "").trim().toUpperCase();
+                    if (userAnswers[idx] === rawAnswerKey) {
+                        correctCount++;
+                    }
+                }
+            });
+
+            document.getElementById('score-correct').innerText = correctCount;
+            document.getElementById('score-total').innerText = allQuestions.length;
+            navigateTo('results');
+        }
+
+        /**
+         * Universal Platform View Utilities
+         */
+        function showLoader() { document.getElementById('global-loader').classList.remove('hidden'); }
+        function hideLoader() { document.getElementById('global-loader').classList.add('hidden'); }
+
+        function showNetworkError(err) {
+            console.error("Critical server pipeline interrupt exception: ", err);
+            alert("Network Error: Failed to maintain handshake connection mapping loops with target Google Script Web App API node.");
+        }
+
+        function initSystemTheme() {
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('theme-icon').className = "fa-solid fa-sun text-xs";
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('theme-icon').className = "fa-solid fa-moon text-xs";
+            }
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.theme = isDark ? 'dark' : 'light';
+            document.getElementById('theme-icon').className = isDark ? "fa-solid fa-sun text-xs" : "fa-solid fa-moon text-xs";
+        }
+    </script>
+</body>
+</html>
