@@ -476,8 +476,9 @@ function goBackToSubjects() {
                 const isViewingChapters = !document.getElementById('view-chapters').classList.contains('hidden');
 
                 if (isViewingQuiz && state.activeSubject && state.activeChapter) {
-                    launchQuizEvaluationEngine(state.activeChapter, state.activeChapterIndex);
-                } else if (isViewingChapters && state.activeSubject) {
+                    // Pull data based on current context safely preserved
+                    launchQuizEvaluationEngine(state.activeChapter, state.activeChapterIndex, true);
+                }else if (isViewingChapters && state.activeSubject) {
                     loadChapters();
                 } else {
                     clearQuizState();
@@ -611,15 +612,17 @@ function goBackToSubjects() {
         }
 
         // --- 4. Quiz Engine Logic ---
-        function launchQuizEvaluationEngine(chapterName, chapterIdx) {
-            state.activeChapter = chapterName;
+        function launchQuizEvaluationEngine(chapterName, chapterIdx, isLanguageSwitch = false) {
             state.activeChapterIndex = chapterIdx !== undefined ? chapterIdx : state.activeChapterIndex;
             
-            // Wipe data only on clean user click selections, not on lang switches
-            if (window.event && window.event.type === 'click') {
-                state.allQuestions = [];
-                state.currentQuestionIndex = 0;
-                state.userAnswers = {};
+            // Wipe question state logs ONLY if it is a fresh manual click and NOT a language switch trigger
+            if (!isLanguageSwitch) {
+                if (window.event && (window.event.type === 'click' || window.event.currentTarget?.id === 'chapters-container')) {
+                    state.allQuestions = [];
+                    state.currentQuestionIndex = 0;
+                    state.userAnswers = {};
+                }
+                state.activeChapter = chapterName;
             }
             saveState();
 
@@ -627,8 +630,8 @@ function goBackToSubjects() {
             const panel = document.getElementById('explanation-panel');
             if(panel) panel.classList.add('hidden');
 
-            // Calls updated full payload API backend action cleanly
-            fetch(`${API_URL}?action=getFullChapterData&sheetName=${encodeURIComponent(state.activeSubject)}&chapterName=${encodeURIComponent(state.activeChapter)}&chapterIndex=${state.activeChapterIndex}&lang=${state.lang}`)
+            // Send BOTH the active text name string AND the absolute numerical index location coordinate to the API
+            fetch(`${API_URL}?action=getFullChapterData&sheetName=${encodeURIComponent(state.activeSubject)}&chapterName=${encodeURIComponent(chapterName)}&chapterIndex=${state.activeChapterIndex}&lang=${state.lang}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.error || !Array.isArray(data) || data.length === 0) {
@@ -637,6 +640,14 @@ function goBackToSubjects() {
                     }
                     
                     state.allQuestions = data;
+                    
+                    // Update state name back to current localized version received from server matrix
+                    if (isLanguageSwitch && data.length > 0) {
+                         // Fallback updates if chapter keys vary
+                         const indicator = document.getElementById('quiz-chapter-indicator');
+                         if(indicator) indicator.innerText = state.activeChapter.toUpperCase();
+                    }
+                    
                     saveState();
                     
                     const indicator = document.getElementById('quiz-chapter-indicator');
