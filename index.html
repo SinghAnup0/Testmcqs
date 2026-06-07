@@ -4,40 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced MCQ Engine</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         
-        /* Mobile Breakpoint Extension Safety */
+        /* UI ELEMENT COMPONENT: Mobile Breakpoint Extension Safety 
+           Prevents horizontal column distortion on legacy responsive viewports (<380px)
+        */
         @media (min-width: 380px) {
             .xs\:block { display: block !important; }
         }
     
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        /* UI ELEMENT COMPONENT: Performance-Optimized Custom Visual Scrollbar Trailing Nodes */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 24px; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+        
+        /* UI ELEMENT COMPONENT: View Change Slide-Up Smooth Interpolation Frames */
         @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .animate-slide-in { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
-        /* Font Scaling Classes */
-        .scale-text-0 { font-size: 0.875rem; line-height: 1.25rem; } /* sm */
-        .scale-text-1 { font-size: 1rem; line-height: 1.5rem; }     /* base */
-        .scale-text-2 { font-size: 1.125rem; line-height: 1.75rem; }/* lg */
-        .scale-text-3 { font-size: 1.25rem; line-height: 1.75rem; } /* xl */
-        .scale-text-4 { font-size: 1.5rem; line-height: 2rem; }     /* 2xl */
+        /* UI ELEMENT COMPONENT: Font Scaling Typography Sizing Maps 
+           Altered dynamically across runtimes via changeFontSize() index triggers
+        */
+        .scale-text-0 { font-size: 0.875rem; line-height: 1.25rem; } /* Compact Variant */
+        .scale-text-1 { font-size: 1rem; line-height: 1.5rem; }     /* Base Variant */
+        .scale-text-2 { font-size: 1.125rem; line-height: 1.75rem; }/* Expanded Variant */
+        .scale-text-3 { font-size: 1.25rem; line-height: 1.75rem; } /* Large Variant */
+        .scale-text-4 { font-size: 1.5rem; line-height: 2rem; }     /* Ultra-Wide Variant */
         
+        /* Option Container Matrix Variant Remaps */
         .scale-opt-0 { font-size: 0.75rem; }
         .scale-opt-1 { font-size: 0.875rem; }
         .scale-opt-2 { font-size: 1rem; }
         .scale-opt-3 { font-size: 1.125rem; }
         .scale-opt-4 { font-size: 1.25rem; }
     </style>
+    
     <script>
+        /* TAILWIND STYLING INFRASTRUCTURE: Core Custom Palette Extended Mapping Profiles */
         tailwind.config = {
             darkMode: 'class',
             theme: { extend: { colors: { brand: { 50: '#f5f3ff', 100: '#ede9fe', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' } } } }
@@ -89,7 +99,7 @@
             </div>
 
             <button id="silent-btn" onclick="toggleHaptics()" class="h-8 w-8 sm:w-auto sm:px-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all border border-transparent shadow-sm">
-                </button>
+            </button>
 
             <button onclick="toggleDarkMode()" class="w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-500 border border-slate-200/40 dark:border-slate-800/40 dark:text-slate-400 flex items-center justify-center transition-all shadow-sm active:scale-95">
                 <i id="theme-icon" class="fa-solid fa-moon text-xs"></i>
@@ -192,101 +202,120 @@
             </div>
         </section>
 
-        <!-- ================================================================= -->
-<!-- DETAILED PERFORMANCE & REVIEW DASHBOARD -->
-<!-- ================================================================= -->
-<section id="view-results" class="hidden max-w-4xl mx-auto px-4 py-6">
-    <!-- Score Summary Card -->
-    <div class="bg-gradient-to-br from-brand-600 to-indigo-700 rounded-3xl p-6 text-white shadow-xl mb-6 text-center">
-        <h3 class="text-xl font-black tracking-tight mb-2">Evaluation Analytics Complete!</h3>
-        <p class="text-xs font-medium text-brand-100 mb-4">Detailed Performance Breakdown Matrix</p>
-        
-        <div class="inline-flex items-center justify-center bg-white/10 backdrop-blur-md rounded-2xl px-6 py-3 border border-white/10">
-            <span class="text-3xl font-black" id="score-correct">0</span>
-            <span class="mx-2 text-xl font-bold opacity-50">/</span>
-            <span class="text-2xl font-bold text-brand-200" id="score-total">0</span>
-        </div>
-        <p class="text-xs font-bold text-emerald-200 mt-3" id="score-percentage-label">Accuracy: 0%</p>
-    </div>
+        <section id="view-results" class="hidden max-w-4xl mx-auto px-4 py-6">
+            <div class="bg-gradient-to-br from-brand-600 to-indigo-700 rounded-3xl p-6 text-white shadow-xl mb-6 text-center">
+                <h3 class="text-xl font-black tracking-tight mb-2">Evaluation Analytics Complete!</h3>
+                <p class="text-xs font-medium text-brand-100 mb-4">Detailed Performance Breakdown Matrix</p>
+                
+                <div class="inline-flex items-center justify-center bg-white/10 backdrop-blur-md rounded-2xl px-6 py-3 border border-white/10">
+                    <span class="text-3xl font-black" id="score-correct">0</span>
+                    <span class="mx-2 text-xl font-bold opacity-50">/</span>
+                    <span class="text-2xl font-bold text-brand-200" id="score-total">0</span>
+                </div>
+                <p class="text-xs font-bold text-emerald-200 mt-3" id="score-percentage-label">Accuracy: 0%</p>
+            </div>
 
-    <!-- Navigation Options -->
-    <div class="flex gap-3 mb-6">
-        <button onclick="clearAndGoHome()" class="flex-1 py-3 px-4 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
-            <i class="fa-solid fa-house"></i> Home Screen
-        </button>
-        <button onclick="goBackToChaptersList()" class="flex-1 py-3 px-4 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/10 flex items-center justify-center gap-2 transition-all">
-            <i class="fa-solid fa-book-open"></i> Other Chapters
-        </button>
-    </div>
+            <div class="flex gap-3 mb-6">
+                <button onclick="clearAndGoHome()" class="flex-1 py-3 px-4 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                    <i class="fa-solid fa-house"></i> Home Screen
+                </button>
+                <button onclick="goBackToChaptersList()" class="flex-1 py-3 px-4 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/10 flex items-center justify-center gap-2 transition-all">
+                    <i class="fa-solid fa-book-open"></i> Other Chapters
+                </button>
+            </div>
 
-    <!-- Scrollable Detailed Review List Target -->
-    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
-        <i class="fa-solid fa-list-check text-brand-500"></i> Item-by-Item Review Audit
-    </h4>
-    <div id="detailed-review-list-container" class="space-y-4">
-        <!-- Injected dynamically via JS -->
-    </div>
-</section>
+            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-brand-500"></i> Item-by-Item Review Audit
+            </h4>
+            <div id="detailed-review-list-container" class="space-y-4"></div>
+        </section>
 
     </div>
 
-    <!-- Core Logic Engine -->
     <script>
+        // API BASE ROUTING ENDPOINT: Links Client Requests to Deployment Macro on Google Apps Script Web Core Framework
         const API_URL = "https://script.google.com/macros/s/AKfycbzznHUO9JjcyNwbh3xKv_LmOiszD9Sj3RiHJnjJp_SvhOHHTffzLsXwQjdBxx2mbGD8/exec"; 
 
-        // Centralized Application State
+        // -------------------------------------------------------------
+        // RUNTIME COMPONENT LOGIC DIAGNOSTIC SUITE
+        // -------------------------------------------------------------
+        // Turn parameter flag to 'true' to deploy immediate lifecycle monitoring reports directly down to internal browser logs.
+        const DEBUG_MODE = false;
+
+        /**
+         * Core Diagnostic Logger Pipeline Handler Method
+         * @param {string} lifecycleContextNode Context string identifier detailing runtime module framework origin
+         * @param {any} contextualPayload Object parameter metrics evaluated across runtime actions
+         */
+        function executeMatrixDiagnosticDebugger(lifecycleContextNode, contextualPayload) {
+            if (!DEBUG_MODE) return;
+            const separationLine = "━".repeat(60);
+            console.group(`%c[DEBUG MATRIX ANALYSIS] 🌐 Node: ${lifecycleContextNode}`, "color: #6366f1; font-weight: bold; font-size: 11px;");
+            console.log(`%cTimestamp Log: ${new Date().toISOString()}`, "color: #94a3b8; font-style: italic;");
+            console.log("%cCaptured Structural State Payload Context Context Metrics:", "color: #475569; font-weight: bold;");
+            console.dir(contextualPayload);
+            console.log(`%cCurrent Application Memory Snapshot State:`, "color: #0d9488;");
+            console.log(JSON.stringify(state));
+            console.groupEnd();
+        }
+
+        // APPLICATION RUNTIME STATE MEMORY NODE SCHEMA MATRIX
         let state = {
             lang: "en",
             haptics: true,
             fontSizeIndex: 1, 
             activeSubject: "",
             activeChapter: "",
-            activeChapterIndex: 0, // Traces position parameters to secure cross-language changes
+            activeChapterIndex: 0, 
             allQuestions: [],
             currentQuestionIndex: 0,
             userAnswers: {} 
         };
     
-    // --- ADD THESE ROUTING HELPERS INSIDE YOUR SCRIPT TAG ---
+        // -------------------------------------------------------------
+        // ROUTING HELPERS INTERACTION METHODS
+        // -------------------------------------------------------------
 
-/**
- * Clears out all current tracking state indices and forces 
- * the application completely back to the main homepage subject index grid layout.
- */
-function clearAndGoHome() {
-    triggerHapticFeedback(15);
-    
-    // Wipe active session state records
-    state.activeSubject = "";
-    state.activeChapter = "";
-    state.activeChapterIndex = 0;
-    state.allQuestions = [];
-    state.currentQuestionIndex = 0;
-    state.userAnswers = {};
-    
-    saveState();         // Persist the wiped slate to local storage
-    loadSubjects();      // Refresh fresh subject items data from endpoint
-    navigateTo('subjects'); // Switch layout panels safely
-}
+        /**
+         * Clears all session parameters and navigates back to the main subjects view.
+         */
+        function clearAndGoHome() {
+            executeMatrixDiagnosticDebugger("Navigation Trigger: Clear and Re-route Home Screen Context Layouts", { action: "clearAndGoHome" });
+            triggerHapticFeedback(15);
+            
+            state.activeSubject = "";
+            state.activeChapter = "";
+            state.activeChapterIndex = 0;
+            state.allQuestions = [];
+            state.currentQuestionIndex = 0;
+            state.userAnswers = {};
+            
+            saveState();         
+            loadSubjects();      
+            navigateTo('subjects'); 
+        }
 
-/**
- * Handles explicit back step navigation from chapters list back to the master subjects block views.
- */
-function goBackToSubjects() {
-    triggerHapticFeedback(10);
-    
-    // De-register subject parameter nodes tracking context indexes
-    state.activeSubject = "";
-    state.activeChapter = "";
-    state.activeChapterIndex = 0;
-    
-    saveState();
-    loadSubjects();
-    navigateTo('subjects');
-}
+        /**
+         * Clears chapter parameters and returns the user to the current subject's chapters list.
+         */
+        function goBackToSubjects() {
+            executeMatrixDiagnosticDebugger("Navigation Trigger: Return to Root Subject Track Repositories", { action: "goBackToSubjects" });
+            triggerHapticFeedback(10);
+            
+            state.activeSubject = "";
+            state.activeChapter = "";
+            state.activeChapterIndex = 0;
+            
+            saveState();
+            loadSubjects();
+            navigateTo('subjects');
+        }
 
-        // --- 1. Initialization & State Persistence ---
+        // -------------------------------------------------------------
+        // INITIALIZATION & STATE PERSISTENCE CORE CONTROL
+        // -------------------------------------------------------------
         document.addEventListener("DOMContentLoaded", () => {
+            executeMatrixDiagnosticDebugger("Engine Initialization: DOM Content Loaded Context Execution", { lifecycle: "boot" });
             loadState();
             initSystemTheme();
             toggleLanguage(state.lang, false);
@@ -299,9 +328,10 @@ function goBackToSubjects() {
                 loadSubjects();
             }
         });
-    
-    
 
+        /**
+         * Saves the current session state into browser local storage cache memory blocks.
+         */
         function saveState() {
             localStorage.setItem('mcq_engine_state', JSON.stringify({
                 lang: state.lang,
@@ -314,8 +344,12 @@ function goBackToSubjects() {
                 currentQuestionIndex: state.currentQuestionIndex,
                 userAnswers: state.userAnswers
             }));
+            executeMatrixDiagnosticDebugger("State Persistent Hook: State Cached To Browser Memory Blocks", { stateObject: state });
         }
 
+        /**
+         * Restores application tracking variables from localStorage cache schemas.
+         */
         function loadState() {
             const saved = localStorage.getItem('mcq_engine_state');
             if (saved) {
@@ -326,9 +360,14 @@ function goBackToSubjects() {
                 } catch (e) { console.error("State parse error", e); }
             }
             updateHapticsUI();
+            executeMatrixDiagnosticDebugger("State Persistent Hook: Sync Stored States Back To Memory Node Structures", { loadedFromStorage: !!saved });
         }
 
+        /**
+         * Flushes the state tracking memory nodes during runtime cycles.
+         */
         function clearQuizState() {
+            executeMatrixDiagnosticDebugger("State Lifecycle Modifier: Clear Quiz Session Context Arrays", { trigger: "clearQuizState" });
             state.activeSubject = "";
             state.activeChapter = "";
             state.activeChapterIndex = 0;
@@ -338,14 +377,25 @@ function goBackToSubjects() {
             saveState();
         }
 
-        // --- 2. Hardware, UI & Gestures ---
+        // -------------------------------------------------------------
+        // HARDWARE INTERACTIONS, THEME HANDLING, & RESPONSIVE TOUCH ENGINE GESTURES
+        // -------------------------------------------------------------
+
+        /**
+         * Updates text scaling across DOM targets by updating active scale class tags.
+         * @param {number} step Sizing increment scale level modification multiplier (+1 / -1)
+         */
         function changeFontSize(step) {
             triggerHapticFeedback(10);
             state.fontSizeIndex = Math.max(0, Math.min(4, state.fontSizeIndex + step));
             saveState();
             applyFontSize();
+            executeMatrixDiagnosticDebugger("UI Font Customizer Action: Applied Scale Metrics Modifications", { sizeIndex: state.fontSizeIndex });
         }
 
+        /**
+         * Injects CSS class layouts onto typography blocks based on active state parameters.
+         */
         function applyFontSize() {
             const qText = document.getElementById('question-text');
             const expText = document.getElementById('explanation-text');
@@ -363,6 +413,9 @@ function goBackToSubjects() {
             });
         }
 
+        /**
+         * Hooks into element viewport touch handlers to monitor and intercept left/right swipe navigation gestures.
+         */
         function initSwipeGestures() {
             const card = document.getElementById('quiz-card-container');
             if(!card) return;
@@ -382,31 +435,43 @@ function goBackToSubjects() {
                 if (document.getElementById('view-quiz').classList.contains('hidden')) return;
                 const threshold = 50; 
                 if (touchStartX - touchEndX > threshold) {
+                    executeMatrixDiagnosticDebugger("Touch Gestures Engine: Recognized Swipe Left Sequence Action", { deltaX: touchStartX - touchEndX });
                     changeQuestion(1); 
                 } else if (touchEndX - touchStartX > threshold) {
+                    executeMatrixDiagnosticDebugger("Touch Gestures Engine: Recognized Swipe Right Sequence Action", { deltaX: touchEndX - touchStartX });
                     changeQuestion(-1); 
                 }
             }
         }
 
+        /**
+         * Vibrates physical device components based on active configuration states.
+         * @param {number} ms Duration in milliseconds to trigger the haptic feedback loop
+         */
         function triggerHapticFeedback(ms) {
             if (state.haptics && navigator.vibrate) {
                 navigator.vibrate(ms);
             }
         }
 
+        /**
+         * Toggles the configuration parameter tracking device feedback permissions.
+         */
         function toggleHaptics() {
             state.haptics = !state.haptics;
             saveState();
             updateHapticsUI();
             if(state.haptics) triggerHapticFeedback(20);
+            executeMatrixDiagnosticDebugger("Hardware Control Configuration: Mutated Vibration System Authorization Keys", { hapticsEnabled: state.haptics });
         }
 
+        /**
+         * Re-renders the button components displaying the active vibration status mode.
+         */
         function updateHapticsUI() {
             const btn = document.getElementById('silent-btn');
             if (!btn) return;
             if (state.haptics) {
-                // The text label remains hidden on extremely narrow screens via the 'hidden xs:block' helper
                 btn.innerHTML = `<i class="fa-solid fa-volume-high text-xs"></i> <span class="text-[10px] uppercase font-bold hidden xs:block">Vibe</span>`;
                 btn.className = "h-8 px-2 rounded-xl text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-400 text-xs font-bold flex items-center gap-1 border border-emerald-200/40 shadow-sm shrink-0";
             } else {
@@ -415,6 +480,9 @@ function goBackToSubjects() {
             }
         }
 
+        /**
+         * Scans configuration maps and systems settings profiles to apply dark/light background states.
+         */
         function initSystemTheme() {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
@@ -427,13 +495,20 @@ function goBackToSubjects() {
             }
         }
 
+        /**
+         * Inverts document color tokens across root HTML layouts, switching between dark and light modes.
+         */
         function toggleDarkMode() {
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.theme = isDark ? 'dark' : 'light';
             const icon = document.getElementById('theme-icon');
             if(icon) icon.className = isDark ? "fa-solid fa-sun text-xs" : "fa-solid fa-moon text-xs";
+            executeMatrixDiagnosticDebugger("UI Core Style Customizer: Switched Active Interface Skin Configuration", { isDarkMode: isDark });
         }
 
+        /**
+         * Slides out the subject indexing links drawer on mobile displays.
+         */
         function toggleSidebar() {
             const overlay = document.getElementById('sidebar-overlay');
             const menu = document.getElementById('sidebar-menu');
@@ -452,8 +527,14 @@ function goBackToSubjects() {
                 setTimeout(() => { overlay.classList.add('hidden'); }, 300);
             }
             triggerHapticFeedback(10);
+            executeMatrixDiagnosticDebugger("UI Interactive Components: Sidebar Navigation Drawer State Toggled", { sideBarOpening: isHidden });
         }
 
+        /**
+         * Updates application target translation dictionaries and refetches data objects if required.
+         * @param {string} lang Target region mapping key context identifier string ("en" / "hi")
+         * @param {boolean} fetchNewData Controls whether network endpoints sync data under translation changes
+         */
         function toggleLanguage(lang, fetchNewData = true) {
             if (!lang) {
                 lang = state.lang === 'en' ? 'hi' : 'en';
@@ -473,6 +554,8 @@ function goBackToSubjects() {
                 if(btnHi) btnHi.className = "px-2.5 py-1 text-xs font-semibold rounded-lg text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800";
             }
 
+            executeMatrixDiagnosticDebugger("UI Cross Language Action: Language Matrix Mutation Hook Captured", { selectedLanguage: state.lang, pipelineRemoteSync: fetchNewData });
+
             if(fetchNewData) {
                 triggerHapticFeedback(20);
                 
@@ -480,9 +563,8 @@ function goBackToSubjects() {
                 const isViewingChapters = !document.getElementById('view-chapters').classList.contains('hidden');
 
                 if (isViewingQuiz && state.activeSubject && state.activeChapter) {
-                    // Pull data based on current context safely preserved
                     launchQuizEvaluationEngine(state.activeChapter, state.activeChapterIndex, true);
-                }else if (isViewingChapters && state.activeSubject) {
+                } else if (isViewingChapters && state.activeSubject) {
                     loadChapters();
                 } else {
                     clearQuizState();
@@ -491,6 +573,10 @@ function goBackToSubjects() {
             }
         }
 
+        /**
+         * Switches the hidden status utility classes across primary dashboard markup wrapper layouts.
+         * @param {string} viewId Element identifier tag to map down and make active ("subjects"/"chapters"/"quiz"/"results")
+         */
         function navigateTo(viewId) {
             ['view-subjects', 'view-chapters', 'view-quiz', 'view-results'].forEach(v => {
                 const element = document.getElementById(v);
@@ -499,9 +585,16 @@ function goBackToSubjects() {
             const target = document.getElementById(`view-${viewId}`);
             if(target) target.classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            executeMatrixDiagnosticDebugger("UI Structural Controller: Navigating View Port Panels Framework", { activeTargetPanelId: `view-${viewId}` });
         }
 
-        // --- 3. Data Fetching Pipeline ---
+        // -------------------------------------------------------------
+        // REMOTE NETWORK DATA FETCHING PIPELINE DATA ENGINE HOOKS
+        // -------------------------------------------------------------
+
+        /**
+         * Pulls the master list of available subject track keys from the endpoint.
+         */
         function loadSubjects() {
             showLoader();
             
@@ -511,9 +604,13 @@ function goBackToSubjects() {
                 "Geography": "भूगोल", "Environment & Ecology": "पर्यावरण और पारिस्थितिकी"
             };
 
-            fetch(`${API_URL}?action=getSubjects&lang=${state.lang}`)
+            const endpointUrl = `${API_URL}?action=getSubjects&lang=${state.lang}`;
+            executeMatrixDiagnosticDebugger("Networking Pipeline Hook: Fetching Subject Index Profiles", { url: endpointUrl });
+
+            fetch(endpointUrl)
                 .then(res => res.json())
                 .then(data => {
+                    executeMatrixDiagnosticDebugger("Networking Response Received: Subject Track Arrays Package", { rawPayloadReceived: data });
                     const container = document.getElementById('subjects-container');
                     const sidebarContainer = document.getElementById('sidebar-subjects-container');
                     if(!container || !sidebarContainer) return;
@@ -572,6 +669,10 @@ function goBackToSubjects() {
                 .finally(() => hideLoader());
         }
 
+        /**
+         * Sets the selected subject string value and triggers the corresponding chapter loader function.
+         * @param {string} subjectName Target database filename identifier record mapping string.
+         */
         function selectSubjectTrack(subjectName) {
             state.activeSubject = subjectName;
             const heading = document.getElementById('current-subject-title');
@@ -579,14 +680,21 @@ function goBackToSubjects() {
             loadChapters();
         }
 
+        /**
+         * Queries the endpoint for available chapter subdivisions belonging to the selected subject tracking key.
+         */
         function loadChapters() {
             showLoader();
             const heading = document.getElementById('current-subject-title');
             if(heading && state.activeSubject) heading.innerText = state.activeSubject.replace(/\.json$/i, '');
 
-            fetch(`${API_URL}?action=getChapters&sheetName=${encodeURIComponent(state.activeSubject)}&lang=${state.lang}`)
+            const endpointUrl = `${API_URL}?action=getChapters&sheetName=${encodeURIComponent(state.activeSubject)}&lang=${state.lang}`;
+            executeMatrixDiagnosticDebugger("Networking Pipeline Hook: Fetching Sub-Specialization Chapter Collections", { url: endpointUrl });
+
+            fetch(endpointUrl)
                 .then(res => res.json())
                 .then(data => {
+                    executeMatrixDiagnosticDebugger("Networking Response Received: Chapters Context Profiles Data", { rawPayloadReceived: data });
                     const container = document.getElementById('chapters-container');
                     if(!container) return;
                     container.innerHTML = "";
@@ -615,11 +723,19 @@ function goBackToSubjects() {
                 .finally(() => hideLoader());
         }
 
-        // --- 4. Quiz Engine Logic ---
+        // -------------------------------------------------------------
+        // CORE QUIZ RUNTIME CORE INTERACTIVE PROCESSING PIPELINE LOGIC
+        // -------------------------------------------------------------
+
+        /**
+         * Initializes and configures state variables for an individual chapter quiz session.
+         * @param {string} chapterName Localized textual descriptive key string mapped down from parent indexes
+         * @param {number} chapterIdx Baseline array index pointer representing structural position coords
+         * @param {boolean} isLanguageSwitch Context flag indicating if execution is triggered by a language switch toggle
+         */
         function launchQuizEvaluationEngine(chapterName, chapterIdx, isLanguageSwitch = false) {
             state.activeChapterIndex = chapterIdx !== undefined ? chapterIdx : state.activeChapterIndex;
             
-            // Wipe question state logs ONLY if it is a fresh manual click and NOT a language switch trigger
             if (!isLanguageSwitch) {
                 if (window.event && (window.event.type === 'click' || window.event.currentTarget?.id === 'chapters-container')) {
                     state.allQuestions = [];
@@ -634,10 +750,13 @@ function goBackToSubjects() {
             const panel = document.getElementById('explanation-panel');
             if(panel) panel.classList.add('hidden');
 
-            // Send BOTH the active text name string AND the absolute numerical index location coordinate to the API
-            fetch(`${API_URL}?action=getFullChapterData&sheetName=${encodeURIComponent(state.activeSubject)}&chapterName=${encodeURIComponent(chapterName)}&chapterIndex=${state.activeChapterIndex}&lang=${state.lang}`)
+            const endpointUrl = `${API_URL}?action=getFullChapterData&sheetName=${encodeURIComponent(state.activeSubject)}&chapterName=${encodeURIComponent(chapterName)}&chapterIndex=${state.activeChapterIndex}&lang=${state.lang}`;
+            executeMatrixDiagnosticDebugger("Networking Pipeline Hook: Fetching Complete Target Questions Stream Node Packet", { url: endpointUrl, chapterIndex: state.activeChapterIndex, languageToggleAction: isLanguageSwitch });
+
+            fetch(endpointUrl)
                 .then(res => res.json())
                 .then(data => {
+                    executeMatrixDiagnosticDebugger("Networking Response Received: Structural Evaluation Questions Collection Data", { questionsCount: data?.length, questionsPayload: data });
                     if (data.error || !Array.isArray(data) || data.length === 0) {
                         alert("Structural Failure: Unable to build parsing indexes.");
                         return;
@@ -645,9 +764,7 @@ function goBackToSubjects() {
                     
                     state.allQuestions = data;
                     
-                    // Update state name back to current localized version received from server matrix
                     if (isLanguageSwitch && data.length > 0) {
-                         // Fallback updates if chapter keys vary
                          const indicator = document.getElementById('quiz-chapter-indicator');
                          if(indicator) indicator.innerText = state.activeChapter.toUpperCase();
                     }
@@ -664,7 +781,11 @@ function goBackToSubjects() {
                 .finally(() => hideLoader());
         }
 
+        /**
+         * Rehydrates and restores active quiz parameters from localStorage when returning to an un-finalized session.
+         */
         function resumeActiveQuizSession() {
+            executeMatrixDiagnosticDebugger("Session Continuity Lifecycle: Re-building Dashboard Layouts From Stored Cache Records", { activeSubjectTrack: state.activeSubject, targetChapter: state.activeChapter });
             const indicator = document.getElementById('quiz-chapter-indicator');
             if(indicator) indicator.innerText = state.activeChapter.toUpperCase();
             const panel = document.getElementById('explanation-panel');
@@ -674,6 +795,9 @@ function goBackToSubjects() {
             navigateTo('quiz');
         }
 
+        /**
+         * Evaluates question choices and score metrics across the active session and prints results to the dynamic text score labels.
+         */
         function updateLiveScoreboard() {
             let correct = 0;
             let wrong = 0;
@@ -711,6 +835,9 @@ function goBackToSubjects() {
             if(elPercent) elPercent.innerText = percent;
         }
 
+        /**
+         * Renders the current question prompt and builds option items dynamically based on the active question data schema index.
+         */
         function renderActiveQuestionCard() {
             const qData = state.allQuestions[state.currentQuestionIndex];
             if (!qData) {
@@ -724,6 +851,8 @@ function goBackToSubjects() {
             const examSource = qData.Exam || qData.exam || qData.Source || qData.source || "";
             const userSelection = state.userAnswers[state.currentQuestionIndex];
             const hasAnswered = userSelection !== undefined;
+
+            executeMatrixDiagnosticDebugger("UI Render Pipeline Action: Painting Active Evaluation Cards Data Frame", { questionIndexPosition: state.currentQuestionIndex, hasUserSubmittedChoice: hasAnswered, userChoiceRecord: userSelection || "None" });
 
             const counter = document.getElementById('quiz-question-counter');
             if(counter) counter.innerText = `Q ${state.currentQuestionIndex + 1}/${state.allQuestions.length}`;
@@ -810,6 +939,10 @@ function goBackToSubjects() {
             syncActiveMatrixItemGridHighlight();
         }
 
+        /**
+         * Commits the selected option to state memory and immediately displays color-coded correction feedback.
+         * @param {string} chosenChar Option unique key character identifier text string ("A"-"E")
+         */
         function registerUserSelectionChoice(chosenChar) {
             if (state.userAnswers[state.currentQuestionIndex] !== undefined) return;
             state.userAnswers[state.currentQuestionIndex] = chosenChar;
@@ -823,8 +956,13 @@ function goBackToSubjects() {
                     setTimeout(() => { toggleExplanation(true); }, 150);
                 }
             }
+            executeMatrixDiagnosticDebugger("User Choice Selection Log Event: Input Value Saved", { questionIndex: state.currentQuestionIndex, selectedKeyChar: chosenChar });
         }
 
+        /**
+         * Increments or decrements the active question pointer index to show adjacent questions.
+         * @param {number} direction Navigation step vector value (+1 for Next, -1 for Prev)
+         */
         function changeQuestion(direction) {
             triggerHapticFeedback(10);
             const targetIndex = state.currentQuestionIndex + direction;
@@ -835,6 +973,10 @@ function goBackToSubjects() {
             }
         }
 
+        /**
+         * Collapses or expands the explanation panel display.
+         * @param {boolean|null} forcedState Pass an explicit boolean state to force a specific panel state, or null to toggle dynamically.
+         */
         function toggleExplanation(forcedState = null) {
             const panel = document.getElementById('explanation-panel');
             if(!panel) return;
@@ -853,6 +995,9 @@ function goBackToSubjects() {
             }
         }
 
+        /**
+         * Builds the right-hand panel grid containing fast-jump navigation buttons for each question item.
+         */
         function buildQuestionMatrixSelectionGrid() {
             const grid = document.getElementById('question-matrix-grid');
             if(!grid) return;
@@ -873,6 +1018,9 @@ function goBackToSubjects() {
             });
         }
 
+        /**
+         * Colors cell indicators in the grid layout to highlight answered, incorrect, or skipped questions.
+         */
         function syncActiveMatrixItemGridHighlight() {
             state.allQuestions.forEach((q, idx) => {
                 const btn = document.getElementById(`matrix-cell-${idx}`);
@@ -900,126 +1048,128 @@ function goBackToSubjects() {
             });
         }
 
+        /**
+         * Validates responses, calculates final scores, builds comprehensive question review item rows, and transitions views.
+         */
         function submitQuizEvaluationReport() {
-    if (!confirm("Are you sure you want to finalize this analysis review session?")) return;
-    triggerHapticFeedback(30);
+            if (!confirm("Are you sure you want to finalize this analysis review session?")) return;
+            triggerHapticFeedback(30);
 
-    let correctCount = 0;
-    const totalQuestions = state.allQuestions.length;
-    
-    // 1. Calculate and populate summary text metrics
-    state.allQuestions.forEach((q, idx) => {
-        if (q) {
-            const rawAnswerKey = (q.Answer || q.answer || "").trim().toUpperCase();
-            if (state.userAnswers[idx] === rawAnswerKey) correctCount++;
-        }
-    });
-
-    const percent = totalQuestions === 0 ? 0 : Math.round((correctCount / totalQuestions) * 100);
-
-    const elCor = document.getElementById('score-correct');
-    const elTot = document.getElementById('score-total');
-    const elPct = document.getElementById('score-percentage-label');
-    
-    if(elCor) elCor.innerText = correctCount;
-    if(elTot) elTot.innerText = totalQuestions;
-    if(elPct) elPct.innerText = `Accuracy Score Profile: ${percent}%`;
-
-    // 2. Build the scrollable item-by-item detailed markup view cards
-    const reviewContainer = document.getElementById('detailed-review-list-container');
-    if (reviewContainer) {
-        reviewContainer.innerHTML = ""; // Flush previous generation data
-
-        state.allQuestions.forEach((q, idx) => {
-            const userAnswer = state.userAnswers[idx];
-            const correctAnswer = (q.Answer || q.answer || "").trim().toUpperCase();
-            const questionText = q.Question || q.question || "";
-            const explanationText = q.Explanation || q.explanation || "No clarification logs available.";
-            const examSource = q.Exam || q.exam || "";
-
-            const isCorrect = userAnswer === correctAnswer;
-            const isSkipped = userAnswer === undefined;
-
-            // Generate contextual style frames based on results
-            let statusBadge = "";
-            let cardBorder = "border-slate-200 dark:border-slate-800";
+            let correctCount = 0;
+            const totalQuestions = state.allQuestions.length;
             
-            if (isSkipped) {
-                statusBadge = `<span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-200/30">Skipped</span>`;
-                cardBorder = "border-amber-400/40 dark:border-amber-500/30";
-            } else if (isCorrect) {
-                statusBadge = `<span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200/30">Correct</span>`;
-                cardBorder = "border-emerald-400/40 dark:border-emerald-500/30";
-            } else {
-                statusBadge = `<span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-200/30">Incorrect</span>`;
-                cardBorder = "border-rose-400/40 dark:border-rose-500/30";
+            state.allQuestions.forEach((q, idx) => {
+                if (q) {
+                    const rawAnswerKey = (q.Answer || q.answer || "").trim().toUpperCase();
+                    if (state.userAnswers[idx] === rawAnswerKey) correctCount++;
+                }
+            });
+
+            const percent = totalQuestions === 0 ? 0 : Math.round((correctCount / totalQuestions) * 100);
+            executeMatrixDiagnosticDebugger("Evaluation Finalization Pipeline: Grading Exam Session Results Data", { scoredCorrectItemsCount: correctCount, overallPercentageScore: percent });
+
+            const elCor = document.getElementById('score-correct');
+            const elTot = document.getElementById('score-total');
+            const elPct = document.getElementById('score-percentage-label');
+            
+            if(elCor) elCor.innerText = correctCount;
+            if(elTot) elTot.innerText = totalQuestions;
+            if(elPct) elPct.innerText = `Accuracy Score Profile: ${percent}%`;
+
+            const reviewContainer = document.getElementById('detailed-review-list-container');
+            if (reviewContainer) {
+                reviewContainer.innerHTML = ""; 
+
+                state.allQuestions.forEach((q, idx) => {
+                    const userAnswer = state.userAnswers[idx];
+                    const correctAnswer = (q.Answer || q.answer || "").trim().toUpperCase();
+                    const questionText = q.Question || q.question || "";
+                    const explanationText = q.Explanation || q.explanation || "No clarification logs available.";
+                    const examSource = q.Exam || q.exam || "";
+
+                    const isCorrect = userAnswer === correctAnswer;
+                    const isSkipped = userAnswer === undefined;
+
+                    let statusBadge = "";
+                    let cardBorder = "border-slate-200 dark:border-slate-800";
+                    
+                    if (isSkipped) {
+                        statusBadge = `<span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-200/30">Skipped</span>`;
+                        cardBorder = "border-amber-400/40 dark:border-amber-500/30";
+                    } else if (isCorrect) {
+                        statusBadge = `<span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200/30">Correct</span>`;
+                        cardBorder = "border-emerald-400/40 dark:border-emerald-500/30";
+                    } else {
+                        statusBadge = `<span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-200/30">Incorrect</span>`;
+                        cardBorder = "border-rose-400/40 dark:border-rose-500/30";
+                    }
+
+                    const optUserText = q[`Option${userAnswer}`] || q[`option_${userAnswer?.toLowerCase()}`] || "None (Unanswered)";
+                    const optCorrectText = q[`Option${correctAnswer}`] || q[`option_${correctAnswer?.toLowerCase()}`] || "";
+
+                    const itemCard = document.createElement('div');
+                    itemCard.className = `p-5 bg-white dark:bg-slate-900 border ${cardBorder} rounded-2xl shadow-sm transition-all`;
+                    itemCard.innerHTML = `
+                        <div class="flex items-center justify-between gap-4 mb-3 border-b border-slate-100 dark:border-slate-800 pb-2">
+                            <span class="text-xs font-black text-slate-400">Question ${idx + 1}</span>
+                            ${statusBadge}
+                        </div>
+                        
+                        ${examSource ? `<p class="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wide mb-1.5">${examSource}</p>` : ''}
+                        <p class="text-xs font-bold text-slate-800 dark:text-slate-100 mb-4 leading-relaxed">${questionText}</p>
+                        
+                        <div class="space-y-2 mb-4">
+                            <div class="p-3 rounded-xl text-xs flex flex-col gap-1 ${isCorrect ? 'bg-emerald-50/40 dark:bg-emerald-950/10 text-emerald-900 dark:text-emerald-300' : 'bg-slate-50 dark:bg-slate-800/40 text-slate-700 dark:text-slate-300'}">
+                                <span class="text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500">Correct Choice Matrix</span>
+                                <p class="font-bold"><span class="inline-block px-1.5 py-0.5 bg-emerald-500 text-white rounded text-[10px] mr-1.5">${correctAnswer}</span> ${optCorrectText}</p>
+                            </div>
+                            
+                            ${!isCorrect ? `
+                            <div class="p-3 rounded-xl text-xs flex flex-col gap-1 ${isSkipped ? 'bg-amber-50/40 dark:bg-amber-950/10 text-amber-900 dark:text-amber-300' : 'bg-rose-50/40 dark:bg-rose-950/10 text-rose-900 dark:text-rose-300'}">
+                                <span class="text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500">Your Answer Record</span>
+                                <p class="font-bold"><span class="inline-block px-1.5 py-0.5 ${isSkipped ? 'bg-amber-500' : 'bg-rose-500'} text-white rounded text-[10px] mr-1.5">${userAnswer || '-'}</span> ${optUserText}</p>
+                            </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/60">
+                            <span class="text-[10px] uppercase font-black tracking-wider text-brand-500 block mb-1">Analytical Explanation</span>
+                            <p class="text-[11px] leading-relaxed font-medium text-slate-600 dark:text-slate-400">${explanationText}</p>
+                        </div>
+                    `;
+                    reviewContainer.appendChild(itemCard);
+                });
             }
 
-            // Extract the descriptive option text mapped exactly to keys
-            const optUserText = q[`Option${userAnswer}`] || q[`option_${userAnswer?.toLowerCase()}`] || "None (Unanswered)";
-            const optCorrectText = q[`Option${correctAnswer}`] || q[`option_${correctAnswer?.toLowerCase()}`] || "";
+            navigateTo('results');
+        }
 
-            const itemCard = document.createElement('div');
-            itemCard.className = `p-5 bg-white dark:bg-slate-900 border ${cardBorder} rounded-2xl shadow-sm transition-all`;
-            itemCard.innerHTML = `
-                <div class="flex items-center justify-between gap-4 mb-3 border-b border-slate-100 dark:border-slate-800 pb-2">
-                    <span class="text-xs font-black text-slate-400">Question ${idx + 1}</span>
-                    ${statusBadge}
-                </div>
-                
-                ${examSource ? `<p class="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wide mb-1.5">${examSource}</p>` : ''}
-                <p class="text-xs font-bold text-slate-800 dark:text-slate-100 mb-4 leading-relaxed">${questionText}</p>
-                
-                <div class="space-y-2 mb-4">
-                    <div class="p-3 rounded-xl text-xs flex flex-col gap-1 ${isCorrect ? 'bg-emerald-50/40 dark:bg-emerald-950/10 text-emerald-900 dark:text-emerald-300' : 'bg-slate-50 dark:bg-slate-800/40 text-slate-700 dark:text-slate-300'}">
-                        <span class="text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500">Correct Choice Matrix</span>
-                        <p class="font-bold"><span class="inline-block px-1.5 py-0.5 bg-emerald-500 text-white rounded text-[10px] mr-1.5">${correctAnswer}</span> ${optCorrectText}</p>
-                    </div>
-                    
-                    ${!isCorrect ? `
-                    <div class="p-3 rounded-xl text-xs flex flex-col gap-1 ${isSkipped ? 'bg-amber-50/40 dark:bg-amber-950/10 text-amber-900 dark:text-amber-300' : 'bg-rose-50/40 dark:bg-rose-950/10 text-rose-900 dark:text-rose-300'}">
-                        <span class="text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500">Your Answer Record</span>
-                        <p class="font-bold"><span class="inline-block px-1.5 py-0.5 ${isSkipped ? 'bg-amber-500' : 'bg-rose-500'} text-white rounded text-[10px] mr-1.5">${userAnswer || '-'}</span> ${optUserText}</p>
-                    </div>
-                    ` : ''}
-                </div>
+        /**
+         * Cleans runtime session maps and routes back to the specific chapters overview without dumping parent data structures.
+         */
+        function goBackToChaptersList() {
+            triggerHapticFeedback(15);
+            
+            state.allQuestions = [];
+            state.currentQuestionIndex = 0;
+            state.userAnswers = {};
+            saveState();
+            
+            loadChapters();
+        }
 
-                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/60">
-                    <span class="text-[10px] uppercase font-black tracking-wider text-brand-500 block mb-1">Analytical Explanation</span>
-                    <p class="text-[11px] leading-relaxed font-medium text-slate-600 dark:text-slate-400">${explanationText}</p>
-                </div>
-            `;
-            reviewContainer.appendChild(itemCard);
-        });
-    }
-
-    // 3. Complete view transition without erasing state variables prematurely
-    navigateTo('results');
-}
-
-/**
- * Custom exit helper that allows a user to go from the detailed review dashboard 
- * directly back to the current subject's chapters view without dropping context parameters.
- */
-function goBackToChaptersList() {
-    triggerHapticFeedback(15);
-    
-    // Clear dynamic quiz variables only
-    state.allQuestions = [];
-    state.currentQuestionIndex = 0;
-    state.userAnswers = {};
-    saveState();
-    
-    // Route clean back to chapters layout
-    loadChapters();
-}
-
+        // -------------------------------------------------------------
+        // HARDWARE INTERACTIVE PERIPHERALS: PHYSICAL KEYBOARD INPUT CAPTURE HANDLERS
+        // -------------------------------------------------------------
         document.addEventListener('keydown', (e) => {
             if (document.getElementById('view-quiz').classList.contains('hidden')) return;
             if (e.key === 'ArrowRight') changeQuestion(1);
             if (e.key === 'ArrowLeft') changeQuestion(-1);
         });
 
+        // -------------------------------------------------------------
+        // APPLICATION UTILITY INJECT HELPER SUBSYSTEMS
+        // -------------------------------------------------------------
         function showLoader() { const l = document.getElementById('global-loader'); if(l) l.classList.remove('hidden'); }
         function hideLoader() { const l = document.getElementById('global-loader'); if(l) l.classList.add('hidden'); }
         function showNetworkError(err) { alert("Network Error: Failed to maintain connection with API."); }
