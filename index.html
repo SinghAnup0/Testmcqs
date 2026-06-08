@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Google Auth</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 400px; margin: auto; text-align: center; }
+    button { padding: 12px 20px; cursor: pointer; font-size: 16px; margin: 10px 0; width: 100%; border-radius: 5px; border: 1px solid #ccc; }
+    #btnGoogle { background-color: #4285F4; color: white; border: none; font-weight: bold; }
+    #btnLogOut { background-color: #d9534f; color: white; border: none; }
+    .status { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; border: 1px solid #eee; }
+    .profile-pic { width: 50px; height: 50px; border-radius: 50%; margin-top: 10px; display: none; }
+  </style>
+</head>
+<body>
+
+  <h2>Firebase Google Sign-In</h2>
+  
+  <!-- Auth Buttons -->
+  <button id="btnGoogle">Sign in with Google</button>
+  <button id="btnLogOut" style="display:none;">Log Out</button>
+
+  <!-- Auth Status & Profile Display -->
+  <div class="status">
+    <strong>Status:</strong> <span id="authStatus">Checking status...</span>
+    <br>
+    <img id="userImg" class="profile-pic" src="" alt="User Profile Picture">
+  </div>
+
+  <!-- Firebase Script Integration -->
+  <script type="module">
+    // Import the required Firebase SDK modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+      getAuth, 
+      GoogleAuthProvider, 
+      signInWithPopup, 
+      signOut, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    // TODO: Replace with your actual Firebase project config
+    const firebaseConfig = {
+  apiKey: "AIzaSyB771nHZeDs610M1P63ssIsr9hr22xD_pE",
+  authDomain: "sample-firebase-ai-app-ec811.firebaseapp.com",
+  projectId: "sample-firebase-ai-app-ec811",
+  storageBucket: "sample-firebase-ai-app-ec811.firebasestorage.app",
+  messagingSenderId: "320233844637",
+  appId: "1:320233844637:web:c086ee345029615a154974"
+};
+
+    // Initialize Firebase and Auth
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    
+    // Create an instance of the Google Provider
+    const provider = new GoogleAuthProvider();
+
+    // DOM Elements
+    const btnGoogle = document.getElementById('btnGoogle');
+    const btnLogOut = document.getElementById('btnLogOut');
+    const authStatus = document.getElementById('authStatus');
+    const userImg = document.getElementById('userImg');
+
+    // 1. Google Sign-In with Popup
+    btnGoogle.addEventListener('click', async () => {
+      try {
+        const result = await signInWithPopup(auth, provider);
+        // This gives you a Google Access Token. You can use it to access the Google API if needed.
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        // The signed-in user info
+        const user = result.user;
+        
+        alert(`Successfully signed in as ${user.displayName}`);
+      } catch (error) {
+        console.error(error);
+        alert(`Sign-in failed: ${error.message}`);
+      }
+    });
+
+    // 2. Log Out
+    btnLogOut.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+        alert("Logged out successfully!");
+      } catch (error) {
+        alert(`Error logging out: ${error.message}`);
+      }
+    });
+
+    // 3. Track Auth State
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in
+        authStatus.innerHTML = `Logged in as:<br><strong>${user.displayName}</strong> (${user.email})`;
+        
+        // Show profile picture if available
+        if (user.photoURL) {
+          userImg.src = user.photoURL;
+          userImg.style.display = 'inline-block';
+        }
+        
+        btnGoogle.style.display = 'none';
+        btnLogOut.style.display = 'block';
+      } else {
+        // User is signed out
+        authStatus.textContent = "Not logged in";
+        userImg.style.display = 'none';
+        userImg.src = "";
+        
+        btnGoogle.style.display = 'block';
+        btnLogOut.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
