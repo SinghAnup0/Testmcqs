@@ -94,8 +94,9 @@
     onAuthStateChanged(auth, (user) => {
       if (user) {
         // User is signed in
-        authStatus.innerHTML = `Logged in as:<br><strong>${user.displayName}</strong> (${user.email})`;
+        //authStatus.innerHTML = `Logged in as:<br><strong>${user.displayName}</strong> (${user.email})`;
         
+        window.location.href = "indexold1.html";
         // Show profile picture if available
         if (user.photoURL) {
           userImg.src = user.photoURL;
